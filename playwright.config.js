@@ -10,7 +10,10 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: 1,
   workers: 5,
-  reporter: 'html',
+  reporter: [
+    ['html', { outputFolder: 'playwright-report', open: 'never' }],
+    ['junit', { outputFile: 'test-results/junit.xml' }],
+  ],
   use: {
     trace: 'retain-on-failure',
     screenshot: 'on-first-failure',
@@ -69,4 +72,3 @@ export default defineConfig({
   ],
 
 });
-
