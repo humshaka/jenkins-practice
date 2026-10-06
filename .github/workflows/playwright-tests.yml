@@ -1,16 +1,19 @@
 name: Playwright Tests
-#setup the trigger for the workflow to run on push, pull request, schedule, and manual dispatch
+
 on:
   push:
     branches:
       - main
+
   pull_request:
     branches:
       - main
     types:
       - closed
+
   schedule:
     - cron: "0 17 * * *"
+
   workflow_dispatch:
 
 permissions:
@@ -19,25 +22,25 @@ permissions:
 jobs:
   playwright-tests:
     if: github.event_name != 'pull_request' || github.event.pull_request.merged == true
-    runs-on: ubuntu-latest #virtual environment to run the job (ubuntu -latest for Linux,windows-latest for Windows, macos-latest for MacOS)
-    timeout-minutes: 30 #maximum time the job can run before it is automatically canceled
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
 
-    env: #mapping the secret to an environment variable to be used in the tests.
+    env:
       PRACTICE_USERNAME: ${{ secrets.PRACTICE_USERNAME }}
-      PRACTICE_PASSWORD: ${{ secrets['PRACTICE_PASSWORD'] }}
+      PRACTICE_PASSWORD: ${{ secrets.PRACTICE_PASSWORD }}
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
 
       - name: Install dependencies
-        run: npm ci # npm install
+        run: npm ci
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
@@ -45,12 +48,13 @@ jobs:
       - name: Run Playwright tests
         run: npm run tests:headless
 
-        #generate a playwright HTML report and test results in JUnit format;
       - name: Upload Playwright reports and test results
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: playwright-report-and-results
-          path: playwright-report/test-results/
+          path: |
+            playwright-report/
+            test-results/
           if-no-files-found: warn
           retention-days: 14
